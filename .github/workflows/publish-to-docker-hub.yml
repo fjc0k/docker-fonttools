@@ -1,0 +1,21 @@
+name: Publish to Docker Hub
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - run: |
+          VERSION=${GITHUB_REF:11}
+          docker login -u jayfong -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          docker build -f ./src/Dockerfile -t jayfong/caddy:latest -t jayfong/caddy:${VERSION} ./src
+          docker push jayfong/caddy:latest
+          docker push jayfong/caddy:${VERSION}
